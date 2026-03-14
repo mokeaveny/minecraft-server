@@ -90,31 +90,9 @@ resource "azurerm_linux_virtual_machine" "minecraft_vm" {
     public_key = file(var.ssh_public_key_path)
   }
 
-  custom_data = base64encode(<<-EOF
-    #!/bin/bash
-    # 1. Update and install Docker
-    sudo apt-get update
-    sudo apt-get install -y docker.io
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    
-    # 2. Prpare a directory for the game data (persistent storage)
-    mkdir -p /home/minecraftadmin/minecraft-data
-    chown -R 1000:1000 /home/minecraftadmin/minecraft-data 
-
-    # 3. Run the Minecraft Container
-    docker run -d \
-      --name minecraft-server \
-      -p 25565:25565 \
-      -e EULA=TRUE \
-      -e VERSION=LATEST \
-      -e TYPE=PAPER \
-      -e MEMORY=3G \
-      -v /home/minecraftadmin/minecraft-data:/data \
-      --restart always \
-      itzg/minecraft-server
-    EOF
-  )
+  custom_data = base64encode(templatefile("scripts/init.sh", {
+    minecraft_memory = var.minecraft_memory
+  }))
 
   os_disk {
     caching              = "ReadWrite"
