@@ -26,6 +26,38 @@ services:
     volumes:
       - /home/minecraftadmin/minecraft-data:/data
     restart: always
+
+  backup-sidecar:
+    image: mcr.microsoft.com/azure-cli
+    container_name: backup-sidecar
+    volumes:
+      - /home/minecraftadmin/minecraft-data:/data:ro
+    environment:
+      STORAGE_ACCOUNT: "${storage_account_name}"
+      CONTAINER_NAME: "${container_name}"
+    restart: always
+    entrypoint: |
+      /bin/sh -c "
+
+      echo 'Waiting 2 minutes for Minecraft to generate world data...'
+      sleep 120
+
+      while true; do
+        TIMESTAMP=\$\$(date +%Y%m%d-%H%M)
+        echo \"Syncing to sub-folder: backups/\$\$TIMESTAMP\"
+
+        az login --identity
+
+        az storage blob upload-batch \
+          --account-name ${storage_account_name} \
+          --destination ${container_name} \
+          --destination-path \"backups/\$\$TIMESTAMP\" \
+          --source /data \
+          --auth-mode login
+
+        echo 'Sync successful. Sleeping for 6 hours...'
+        sleep 6h
+      done" 
 EOT
 
 # 4. Start the Minecraft server

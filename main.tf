@@ -1,3 +1,7 @@
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 resource "azurerm_resource_group" "minecraft_rg" {
   name     = "minecraft-resources"
   location = "UK South"
@@ -85,6 +89,10 @@ resource "azurerm_linux_virtual_machine" "minecraft_vm" {
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.minecraft_nic.id]
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   admin_ssh_key {
     username   = var.admin_username
     public_key = file(var.ssh_public_key_path)
@@ -92,6 +100,8 @@ resource "azurerm_linux_virtual_machine" "minecraft_vm" {
 
   custom_data = base64encode(templatefile("scripts/init.sh", {
     minecraft_memory = var.minecraft_memory
+    storage_account_name = azurerm_storage_account.minecraft_storage.name
+    container_name = azurerm_storage_container.minecraft_backups.name
   }))
 
   os_disk {
