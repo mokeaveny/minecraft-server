@@ -18,3 +18,8 @@ variable "minecraft_memory" {
   type        = string
   default     = "3G" # Default to 3 GB of RAM, which is a good starting point for a small server
 }
+
+variable "contact_email" {
+  description = "Email address to receive budget notifications"
+  type        = string
+}
