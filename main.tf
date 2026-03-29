@@ -99,9 +99,9 @@ resource "azurerm_linux_virtual_machine" "minecraft_vm" {
   }
 
   custom_data = base64encode(templatefile("scripts/init.sh", {
-    minecraft_memory = var.minecraft_memory
+    minecraft_memory     = var.minecraft_memory
     storage_account_name = azurerm_storage_account.minecraft_storage.name
-    container_name = azurerm_storage_container.minecraft_backups.name
+    container_name       = azurerm_storage_container.minecraft_backups.name
   }))
 
   os_disk {
