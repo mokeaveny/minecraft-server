@@ -22,7 +22,8 @@ services:
     environment:
       EULA: "TRUE"
       MEMORY: "${minecraft_memory}"
-      TYPE: "PAPER"
+      TYPE: "VANILLA"
+      VERSION: "LATEST"
     volumes:
       - /home/minecraftadmin/minecraft-data:/data
     restart: always

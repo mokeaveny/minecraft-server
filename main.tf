@@ -27,6 +27,7 @@ resource "azurerm_public_ip" "minecraft_public_ip" {
   resource_group_name = azurerm_resource_group.minecraft_rg.name
   location            = azurerm_resource_group.minecraft_rg.location
   allocation_method   = "Static"
+  domain_name_label = "mokeaveny-minecraft-server"
 }
 
 # This NSG allows inbound traffic on port 25565, which is the default port for Minecraft servers. It also allows all outbound traffic.

@@ -23,3 +23,8 @@ variable "contact_email" {
   description = "Email address to receive budget notifications"
   type        = string
 }
+
+variable "cloudflare_api_token" {
+  description = "API token for Cloudflare with permissions to manage DNS records"
+  type        = string
+}
