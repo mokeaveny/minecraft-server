@@ -79,7 +79,9 @@ tail -f /var/log/cloud-init-output.log
 3. Monitor Health (KQL)
 Run this in the Log Analytics Workspace to see live RAM usage:
 
+```sh
 Perf
 | where CounterName == "Available MBytes"
 | summarize avg(CounterValue) by bin(TimeGenerated, 1m)
 | render timechart
+```
