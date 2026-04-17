@@ -28,3 +28,9 @@ variable "cloudflare_api_token" {
   description = "API token for Cloudflare with permissions to manage DNS records"
   type        = string
 }
+
+variable "cloudflare_zone_id" {
+  type        = string
+  description = "The Zone ID for michaelkeaveny.com"
+  sensitive   = true # Tells Terraform to hide this in logs
+}

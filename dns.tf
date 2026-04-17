@@ -1,5 +1,5 @@
 resource "cloudflare_record" "minecraft_server_cname" {
-    zone_id = "0a60ce2d42854f4c64a957f31a403506"
+    zone_id = var.cloudflare_zone_id
     name = "minecraft"
     value = azurerm_public_ip.minecraft_public_ip.fqdn
     type = "CNAME"
