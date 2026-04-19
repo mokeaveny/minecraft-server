@@ -1,4 +1,18 @@
-A production-grade, automated Minecraft deployment on Microsoft Azure, managed entirely via Infrastructure as Code (IaC). This project demonstrates a "Zero-Touch" deployment where the server goes from "Code" to "Playable" without manual login.
+A production-grade, automated Minecraft deployment on Microsoft Azure, managed entirely via Infrastructure as Code (IaC). This project demonstrates a "Zero-Touch" deployment where the environment moves from code to a playable, DNS-secured state with Zero-Secret leakage.
+
+To mirror enterprise-grade environments, this project implements a Layered Infrastructure Strategy. By decoupling the long-lived security components from the transient compute resources, we ensure a stable "Root of Trust" that survives application teardowns.
+
+1. The Foundation Layer (/foundation)
+This includes all of code to provision the "persistent" services used in the project. It is deployed once and rarely destroyed. Currently includes:
+    - Azure Key Vault: Centralized, RBAC-protected storage for sensitive credentials.
+    - Identity Management: Configures the security principals required for the workload to "reach" into the vault.
+    - Lifecycle Guards: Implements prevent_destroy and purge_protection to safeguard secrets.
+
+2. The Workload Layer (/workloads/minecraft)
+This is the "Disposable Compute" layer. It contains the game server and its networking. Currently includes:
+    - Dynamic Discovery: Utilizes terraform_remote_state to automatically find the Key Vault without manual variable injection.
+    - Just-In-Time Secrets: Pulls Cloudflare API tokens and Zone IDs directly into memory during the apply phase.
+    - Compute: An Ubuntu VM running Dockerized Minecraft with Azure Monitor Agent (AMA) integration and a sidecar backup service.
 
 This stack follows a three-tier automation strategy:
 
@@ -36,7 +50,6 @@ Before deploying, you must provide values for several required variables. These 
 - `ssh_public_key_path`: Path to your SSH public key for VM access (e.g., `"/home/user/.ssh/id_rsa.pub"`)
 - `admin_username`: Admin username for the VM
 - `contact_email`: Email address to receive budget notifications
-- `cloudflare_api_token`: API token for Cloudflare with permissions to manage DNS records
 
 **Optional variables:**
 
@@ -57,28 +70,42 @@ ssh_public_key_path  = "/path/to/your/.ssh/id_rsa.pub"
 admin_username       = "your_admin_username"
 minecraft_memory     = "3G"
 contact_email        = "your@email.com"
-cloudflare_api_token = "your_cloudflare_token"
 ```
 
 Deployment Guide:
 
-1. Initialize & Apply:
+Phase 1: Provision the Foundation
+Build the security core first. This only needs to be done once.
 
 ```sh
+cd foundation/
+terraform init
+terraform apply
+```
+
+Manual Step: Seed your secrets into the newly created Vault (note - this requires the Azure CLI being installed on your machine):
+```sh
+az keyvault secret set --vault-name <vault_name_from_output> --name "cloudflare-api-token" --value "your_token"
+az keyvault secret set --vault-name <vault_name_from_output> --name "cloudflare-zone-id" --value "your_zone_id"
+```
+
+Phase 2: Provision the Workload
+Deploy the server. This layer automatically "reaches back" to the foundation for its secrets.
+
+```sh
+cd ../workloads/minecraft/
 terraform init
 terraform apply -var-file="production.tfvars"
 ```
 
-2. The Bootstrapping Phase
-Once Terraform finishes, the VM will execute the `init.sh` script. You can track the progress by SSHing in and running:
+Monitoring & Health
+Once the server is live, you can track the bootstrapping progress by SSHing into the VM:
 
 ```sh
 tail -f /var/log/cloud-init-output.log
 ```
 
-3. Monitor Health (KQL)
-Run this in the Log Analytics Workspace to see live RAM usage:
-
+To monitor live RAM usage in the Azure Portal, use the following KQL Query:
 ```sh
 Perf
 | where CounterName == "Available MBytes"

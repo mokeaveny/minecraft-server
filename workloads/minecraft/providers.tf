@@ -20,5 +20,5 @@ provider "azurerm" {
 }
 
 provider "cloudflare" {
-  api_token = var.cloudflare_api_token
+  api_token = data.azurerm_key_vault_secret.cf_api_token.value
 }

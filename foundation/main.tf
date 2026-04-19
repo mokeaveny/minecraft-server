@@ -31,6 +31,10 @@ resource "azurerm_role_assignment" "minecraft_kv_admin" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+output "resource_group_name" {
+  value = azurerm_resource_group.minecraft_mgmt_rg.name
+}
+
 output "key_vault_name" {
   value = azurerm_key_vault.minecraft_kv.name
 }
