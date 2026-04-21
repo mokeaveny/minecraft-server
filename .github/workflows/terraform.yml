@@ -46,7 +46,7 @@ jobs:
           -backend-config="resource_group_name=${{ secrets.REMOTE_STATE_RESOURCE_GROUP_NAME }}" \
           -backend-config="storage_account_name=${{ secrets.REMOTE_STATE_STORAGE_ACCOUNT_NAME }}" \
           -backend-config="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-        working-directory: ./workloads/minecraft
+      working-directory: ./workloads/minecraft
 
     - name: Terraform Plan
       run: terraform plan -input=false
