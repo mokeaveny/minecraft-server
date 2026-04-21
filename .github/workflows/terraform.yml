@@ -20,11 +20,11 @@ jobs:
       ARM_USE_OIDC: true
       TF_VAR_remote_state_resource_group_name: ${{ secrets.REMOTE_STATE_RESOURCE_GROUP_NAME }}
       TF_VAR_remote_state_storage_account_name: ${{ secrets.REMOTE_STATE_STORAGE_ACCOUNT_NAME }}
-      TF_VAR_SHH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
-      TF_VAR_HOME_IP_ADDRESS: ${{ secrets.HOME_IP_ADDRESS }}
-      TF_ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
-      TF_CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
-      TF_MINECRAFT_MEMORY: ${{ vars.MINECRAFT_MEMORY }}
+      TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+      TF_VAR_home_ip_address: ${{ secrets.HOME_IP_ADDRESS }}
+      TF_VAR_admin_username: ${{ vars.ADMIN_USERNAME }}
+      TF_VAR_contact_email: ${{ vars.CONTACT_EMAIL }}
+      TF_VAR_minecraft_memory: ${{ vars.MINECRAFT_MEMORY }}
 
     steps:
     - name: Checkout
