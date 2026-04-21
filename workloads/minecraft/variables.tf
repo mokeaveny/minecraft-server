@@ -23,3 +23,13 @@ variable "contact_email" {
   description = "Email address to receive budget notifications"
   type        = string
 }
+
+variable "remote_state_storage_account_name" {
+  type        = string
+  description = "The name of the storage account where foundation state is kept."
+}
+
+variable "remote_state_resource_group_name" {
+  type        = string
+  description = "The resource group for the storage account."
+}
