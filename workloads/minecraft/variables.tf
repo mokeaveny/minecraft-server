@@ -3,8 +3,8 @@ variable "home_ip_address" {
   type        = string
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to your SSH public key for VM access"
+variable "ssh_public_key" {
+  description = "Your SSH public key for VM access"
   type        = string
 }
 
