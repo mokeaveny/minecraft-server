@@ -59,9 +59,14 @@ jobs:
 
     - name: Terraform Action
       run: |
-        if [ "${{ github.event.inputs.action }}" == "apply" ]; then
+        # Set a local variable: Use the input if it exists, otherwise default to 'apply'
+        ACTION=${{ github.event.inputs.action || 'apply' }}
+        
+        echo "Executing action: $ACTION"
+
+        if [ "$ACTION" == "apply" ]; then
           terraform apply -auto-approve -input=false
-        elif [ "${{ github.event.inputs.action }}" == "destroy" ]; then
+        elif [ "$ACTION" == "destroy" ]; then
           terraform destroy -auto-approve -input=false
         else
           echo "Invalid action. Please enter 'apply' or 'destroy'."
