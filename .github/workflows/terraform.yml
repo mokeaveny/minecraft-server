@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - main
-    pull_request:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Type "apply" to build/update, or "destroy" to tear down the infrastructure'
+        required: true
+        default: 'apply'
   
 permissions:
   id-token: write
@@ -52,7 +57,14 @@ jobs:
       run: terraform plan -input=false
       working-directory: ./workloads/minecraft
 
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false
+    - name: Terraform Action
+      run: |
+        if [ "${{ github.event.inputs.action }}" == "apply" ]; then
+          terraform apply -auto-approve -input=false
+        elif [ "${{ github.event.inputs.action }}" == "destroy" ]; then
+          terraform destroy -auto-approve -input=false
+        else
+          echo "Invalid action. Please enter 'apply' or 'destroy'."
+          exit 1
+        fi
       working-directory: ./workloads/minecraft
