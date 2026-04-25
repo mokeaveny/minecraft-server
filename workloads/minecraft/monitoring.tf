@@ -1,15 +1,15 @@
 resource "azurerm_log_analytics_workspace" "minecraft_logs" {
   name                = "law-minecraft-${random_id.suffix.hex}"
-  location            = azurerm_resource_group.minecraft_rg.location
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
 resource "azurerm_monitor_data_collection_rule" "minecraft_dcr" {
   name                = "dcr-minecraft-metrics"
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
-  location            = azurerm_resource_group.minecraft_rg.location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
 
   destinations {
     log_analytics {

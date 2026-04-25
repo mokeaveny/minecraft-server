@@ -1,7 +1,7 @@
 resource "azurerm_storage_account" "minecraft_storage" {
   name                     = "minecraftbackups${random_id.suffix.hex}"
-  resource_group_name      = azurerm_resource_group.minecraft_rg.name
-  location                 = azurerm_resource_group.minecraft_rg.location
+  resource_group_name      = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
+  location                 = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }

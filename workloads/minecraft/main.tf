@@ -2,21 +2,16 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
-resource "azurerm_resource_group" "minecraft_rg" {
-  name     = "minecraft-resources"
-  location = "UK South"
-}
-
 resource "azurerm_virtual_network" "minecraft_vnet" {
   name                = "minecraft-network"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.minecraft_rg.location
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
 }
 
 resource "azurerm_subnet" "minecraft_subnet" {
   name                 = "minecraft-subnet"
-  resource_group_name  = azurerm_resource_group.minecraft_rg.name
+  resource_group_name  = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
   virtual_network_name = azurerm_virtual_network.minecraft_vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 }
@@ -24,8 +19,8 @@ resource "azurerm_subnet" "minecraft_subnet" {
 # Need this to have a public IP for the VM to be accessible from the internet so we can connect to the Minecraft server
 resource "azurerm_public_ip" "minecraft_public_ip" {
   name                = "minecraft-ip"
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
-  location            = azurerm_resource_group.minecraft_rg.location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
   allocation_method   = "Static"
   domain_name_label = "mokeaveny-minecraft-server"
 }
@@ -33,8 +28,8 @@ resource "azurerm_public_ip" "minecraft_public_ip" {
 # This NSG allows inbound traffic on port 25565, which is the default port for Minecraft servers. It also allows all outbound traffic.
 resource "azurerm_network_security_group" "minecraft_nsg" {
   name                = "minecraft-nsg"
-  location            = azurerm_resource_group.minecraft_rg.location
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
 
   # Rule for Minecraft players to connect to the server
   security_rule {
@@ -65,8 +60,8 @@ resource "azurerm_network_security_group" "minecraft_nsg" {
 
 resource "azurerm_network_interface" "minecraft_nic" {
   name                = "minecraft-nic"
-  location            = azurerm_resource_group.minecraft_rg.location
-  resource_group_name = azurerm_resource_group.minecraft_rg.name
+  location            = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
+  resource_group_name = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
 
   ip_configuration {
     name                          = "minecraft-ip-config"
@@ -84,8 +79,8 @@ resource "azurerm_network_interface_security_group_association" "minecraft_nic_n
 # Size is Standard_B2s, which is a good size for a small Minecraft server. It has 2 vCPUs and 4 GB of RAM, which should be sufficient for a small number of players.
 resource "azurerm_linux_virtual_machine" "minecraft_vm" {
   name                  = "minecraft-server"
-  resource_group_name   = azurerm_resource_group.minecraft_rg.name
-  location              = azurerm_resource_group.minecraft_rg.location
+  resource_group_name   = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_name
+  location              = data.terraform_remote_state.foundation.outputs.minecraft_resource_group_location
   size                  = "Standard_B2s"
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.minecraft_nic.id]

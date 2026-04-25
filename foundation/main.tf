@@ -31,8 +31,25 @@ resource "azurerm_role_assignment" "minecraft_kv_admin" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+resource "azurerm_resource_group" "minecraft_resource_group" {
+  name     = "minecraft-resources"
+  location = "UK South"
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.minecraft_mgmt_rg.name
+}
+
+output "minecraft_resource_group_name" {
+  value = azurerm_resource_group.minecraft_resource_group.name
+}
+
+output "minecraft_resource_group_location" {
+  value = azurerm_resource_group.minecraft_resource_group.location
+}
+
+output "minecraft_resource_group_id" {
+  value = azurerm_resource_group.minecraft_resource_group.id
 }
 
 output "key_vault_name" {
