@@ -36,6 +36,20 @@ resource "azurerm_resource_group" "minecraft_resource_group" {
   location = "UK South"
 }
 
+# Grant GitHub Actions Contributor access to the Minecraft resource group so that it can create and manage resources within it.
+resource "azurerm_role_assignment" "github_actions_contributor" {
+  scope                = azurerm_resource_group.minecraft_resource_group.id
+  role_definition_name = "Contributor"
+  principal_id         = var.github_actions_service_principal_object_id
+}
+
+# Grant GitHub Actions User Access Administrator access to the Minecraft resource group so that it can create or delete role assigmments within it.
+resource "azurerm_role_assignment" "github_actions_user_access_administrator" {
+  scope                = azurerm_resource_group.minecraft_resource_group.id
+  role_definition_name = "User Access Administrator"
+  principal_id         = var.github_actions_service_principal_object_id
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.minecraft_mgmt_rg.name
 }
