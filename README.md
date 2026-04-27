@@ -112,3 +112,33 @@ Perf
 | summarize avg(CounterValue) by bin(TimeGenerated, 1m)
 | render timechart
 ```
+
+Lessons Learned
+
+1. Infrastructure Layering & State Persistence
+    - The Challenge: Realized that keeping the Resource Group in the workload folder caused the pipeline to "de-authorize" itself when the workload was destroyed.
+    - The Lesson: I learned the importance of separating lifecycle boundaries. By refactoring the Resource Group into a long-lived foundation/ layer, I ensured that security roles and networking remained intact while allowing the workload/ compute to be fully ephemeral and disposable.
+
+2. Identity-Driven Security (OIDC)
+    - The Challenge: Handling static Service Principal secrets in GitHub was a security risk and required manual rotation.
+    - The Lesson: I transitioned to GitHub OIDC (OpenID Connect). I learned how to establish a passwordless trust relationship via Federated Credentials, which taught me that the most secure secret is the one that doesn't exist.
+
+3. Azure RBAC & Scopes
+    - The Challenge: Encountered a 403 Forbidden error because the app registration setup via Federated Credentials had the 'Contributor' role but lacked the permission to manage role assignments. This resulted in the pipeline failing as the terraform apply or destroy command would fail due to lack of permissions.
+    - The Lesson: This taught me the Principle of Least Privilege in a practical way. I learned to assign the 'User Access Administrator' role specifically at the Resource Group scope allowing the pipeline to manage the Managed Identity roles it created without granting it 'Owner' status over the subscription (which would be too many permissions).
+
+4. Defensive CI/CD Programming
+    - The Challenge: The pipeline crashed on standard git push triggers because the manual input variables (workflow_dispatch) where null.
+    - The Lesson: I learned to implement Event-Driven Fallbacks in YAML. By using shell expansion logic (${{ github.event.inputs.action || 'apply' }}), I ensured the pipeline was resilient enough to handle both automated branch updates and manual UI instructions.
+
+5. Passing Sensitive Data Through Variable Injection
+    - The Challenge: Passing sensitive data like Cloudflare tokens and SSH keys without commiting them to version control.
+    - The Lesson: I mastered Terraform Variable Precedence. I learned to map GitHub secrets to the TF_VAR_ environment variable prefix, allowing the runner to ingest data dynamically. This also taught me how to refactor code to use Remote State Outputs instead of local file dependencies (like .pub files).
+
+6. Cost Governance and Resource Resiliency
+    - The Challenge: Managing the financial risk of public cloud resources and the technical risk of data loss.
+    - The Lesson: I learned that operations are as important as code. By implementing Azure Budget Alerts and a 7-day retention sidecar backup policy, I ensured the project was economically sustainable and protected against accidental world corruption.
+
+7. Identity Resolution (App vs Service Principal)
+    - The Challenge: Faced PrincipalTypeNotSupported errors when trying to assign roles via Terraform.
+    - The Lesson: I gained a deep understanding of Entra ID (formerly Azure AD). I learned that while the "App Registration" is the definition, the "Enterprise Application/Service Principal" is the actual identity used for RBAC, each with its own distinct Object ID.
